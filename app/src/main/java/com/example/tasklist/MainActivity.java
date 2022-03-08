@@ -1,5 +1,6 @@
 package com.example.tasklist;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -7,14 +8,27 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.LinearLayout;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private RecyclerView recyclerView;
+    private TaskAdapter taskAdapter;
+    private List<Task> taskList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +36,29 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+
+        // configurando recycler
+        recyclerView = findViewById(R.id.recyclerView);
+
+        // adicionar evento de clique
+        recyclerView.addOnItemTouchListener(
+                new RecyclerItemClickListener(getApplicationContext(), recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                       Log.i("click", "onItemClick");
+                    }
+
+                    @Override
+                    public void onLongItemClick(View view, int position) {
+                        Log.i("click", "onLongItemClick");
+                    }
+
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                    }
+                })
+        );
 
         setSupportActionBar(toolbar);
 
@@ -34,6 +71,30 @@ public class MainActivity extends AppCompatActivity {
               startActivity(intent);
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        loadTasksList();
+        super.onStart();
+    }
+
+    public void loadTasksList () {
+        // listar tarefas
+       TaskDAO taskDAO = new TaskDAO(getApplicationContext());
+       taskList = taskDAO.list();
+
+
+        // configurar o adapter
+        taskAdapter = new TaskAdapter(taskList);
+
+
+        // configurar recyclerView
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(), LinearLayout.VERTICAL));
+        recyclerView.setAdapter(taskAdapter);
     }
 
     @Override
