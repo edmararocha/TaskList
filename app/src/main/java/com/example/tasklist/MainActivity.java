@@ -1,11 +1,13 @@
 package com.example.tasklist;
 
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
@@ -29,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private TaskAdapter taskAdapter;
     private List<Task> taskList = new ArrayList<>();
+    private Task selectedTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +48,43 @@ public class MainActivity extends AppCompatActivity {
                 new RecyclerItemClickListener(getApplicationContext(), recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                       Log.i("click", "onItemClick");
+//                       Log.i("click", "onItemClick");
+
+                        // recuperar a tarefa
+                        Task taskSelected = taskList.get(position);
+
+                        // enviar tarefa para tela de adicionar tarefa
+                        Intent intent = new Intent(MainActivity.this, AddTask.class);
+                        intent.putExtra("task selected", taskSelected);
+
+                        startActivity(intent);
                     }
 
                     @Override
                     public void onLongItemClick(View view, int position) {
-                        Log.i("click", "onLongItemClick");
+//                      Log.i("click", "onLongItemClick");
+
+                        selectedTask = taskList.get(position);
+
+                        AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+
+                        // configurar titulo e mensagem
+                        dialog.setTitle("Confirmar exclusão");
+                        dialog.setMessage("Deseja excluir a tarefa: " + selectedTask.getNome() + "?");
+
+                        // configurar botões
+                        dialog.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                            }
+                        });
+
+                        dialog.setNegativeButton("Não", null);
+
+                        // exibir a dialog
+                        dialog.create();
+                        dialog.show();
                     }
 
                     @Override

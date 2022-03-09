@@ -13,6 +13,7 @@ import com.google.android.material.textfield.TextInputEditText;
 public class AddTask extends AppCompatActivity {
 
     private TextInputEditText textTask;
+    private Task atualTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +21,14 @@ public class AddTask extends AppCompatActivity {
         setContentView(R.layout.activity_add_task);
 
         textTask = findViewById(R.id.textTask);
+
+        // recuperar tarefa caso seja uma edição
+        atualTask = (Task) getIntent().getSerializableExtra("task selected");
+
+        // configurar tarefa na caixa de texto
+        if (atualTask != null) {
+            textTask.setText(atualTask.getNome());
+        }
     }
 
     @Override
@@ -33,10 +42,46 @@ public class AddTask extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.itemSave:
+
                 TaskDAO taskDAO = new TaskDAO(getApplicationContext());
-                Task task = new Task();
-                task.setNome("tarefa");
-                taskDAO.save(task);
+
+                // editar
+                if (atualTask != null) {
+                    String taskName = textTask.getText().toString();
+
+                    if (!taskName.isEmpty()) {
+                        Task task = new Task();
+                        task.setNome(taskName);
+                        task.setId(atualTask.getId());
+
+                        if (taskDAO.update(task)) {
+                            Toast.makeText(getApplicationContext(), "Sucesso ao atualizar tarefa!", Toast.LENGTH_SHORT).show();
+
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Erro ao atualizar tarefa!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    finish();
+
+                // salvar
+                } else {
+
+                    String taskName = textTask.getText().toString();
+
+                    if (!taskName.isEmpty()) {
+                        Task task = new Task();
+                        task.setNome(taskName);
+
+                        if (taskDAO.save(task)) {
+                            Toast.makeText(getApplicationContext(), "Sucesso ao salvar tarefa!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Erro ao salvar tarefa!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    finish();
+                }
 
                 break;
         }
